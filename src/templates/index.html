@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoVision AI | Enhanced Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Particles.js for interactive background -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+<body>
+    <!-- Interactive Particles Background -->
+    <div id="particles-js"></div>
+
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <span class="gradient-text">AutoVision</span> AI
+            </div>
+            <nav>
+                <button class="nav-btn active" data-target="dashboard">Analytics Hub</button>
+                <button class="nav-btn" data-target="predict">Model Predictor</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="view-section active">
+                <div class="hero glow-effect">
+                    <h1>Performance <span class="gradient-text">Analytics Hub</span></h1>
+                    <p>Live, comprehensive machine learning evaluation metrics.</p>
+                </div>
+
+                <!-- Premium Project Intro (DJI/Samsung Style Bento Grid) -->
+                <div class="project-showcase">
+                    <div class="bento-grid">
+                        <div class="bento-item glass-panel interactive-card bento-wide">
+                            <div class="bento-content">
+                                <div class="bento-tag"><span class="pulse-dot"></span> NEURAL PIPELINE</div>
+                                <h2 class="bento-title">Inference & Prediction Architecture</h2>
+                                <p class="bento-body">Our prediction engine utilizes a fine-tuned <strong>EfficientNet-B0</strong> running natively in PyTorch. Raw images are ingested, dynamically resized to 224x224, and normalized using strict ImageNet variance tensors. The data then cascades through 5.3 million parameters, ending in a Softmax classification layer that generates an absolute probability vector across all 10 target vehicle models.</p>
+                            </div>
+                            <div class="bento-bg bg-grid"></div>
+                        </div>
+                        <div class="bento-item glass-panel interactive-card bento-tall">
+                            <div class="bento-content">
+                                <div class="bento-tag"><span class="pulse-dot hue-alt"></span> OPTIMIZATION</div>
+                                <h2 class="bento-title">Extreme Regularization</h2>
+                                <p class="bento-body">To combat neural overfitting, the training pipeline actively mutates the dataset using massive RandomErasing, Affine rotations, and dynamic ColorJittering. The model was stabilized using AMP (Automatic Mixed Precision) and Cosine Annealing Learning Rates.</p>
+                            </div>
+                            <div class="bento-bg bg-glow"></div>
+                        </div>
+                        <div class="bento-item glass-panel interactive-card bento-wide">
+                            <div class="bento-content">
+                                <div class="bento-tag"><span class="pulse-dot hue-alt2"></span> EXPLAINABILITY</div>
+                                <h2 class="bento-title">GradCAM Spatial Interceptor</h2>
+                                <p class="bento-body">This is not a black-box model. During inference, we attach a `full_backward_hook` to the final convolutional layer. By multiplying the forward feature maps against the backward gradients, the engine calculates a spatial heatmap of exactly what pixels influenced the AI's final decision. Our custom 3x3 grid-analyzer then automatically calculates the bounding boxes of the highest activating features (e.g. Grille, Headlight, or Roof).</p>
+                            </div>
+                            <div class="bento-bg bg-matrix"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 10 Different Advanced Metrics grid -->
+                <h3 class="section-title">Core Classification Metrics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card glass-panel interactive-card">
+                        <div class="icon-bubble">🎯</div>
+                        <h3>Accuracy</h3>
+                        <div class="stat-value"><span class="counter" id="m-acc">0</span>%</div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card">
+                        <div class="icon-bubble">🏆</div>
+                        <h3>Top-3 Accuracy</h3>
+                        <div class="stat-value"><span class="counter" id="m-top3">0</span>%</div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card">
+                        <div class="icon-bubble">⚖️</div>
+                        <h3>F1 Score</h3>
+                        <div class="stat-value"><span class="counter" id="m-f1">0</span>%</div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card">
+                        <div class="icon-bubble">📈</div>
+                        <h3>ROC AUC</h3>
+                        <div class="stat-value"><span class="counter" id="m-roc">0</span></div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Advanced Reliability Metrics</h3>
+                <div class="stats-grid advanced-grid">
+                    <div class="stat-card glass-panel interactive-card small-card">
+                        <h3>Precision</h3>
+                        <div class="stat-value small"><span class="counter" id="m-prec">0</span>%</div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card small-card">
+                        <h3>Recall</h3>
+                        <div class="stat-value small"><span class="counter" id="m-rec">0</span>%</div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card small-card">
+                        <h3>Cohen's Kappa</h3>
+                        <p class="tool-tip">Measures inter-rater reliability</p>
+                        <div class="stat-value small"><span class="counter" id="m-kappa">0</span></div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card small-card">
+                        <h3>MCC</h3>
+                        <p class="tool-tip">Matthews Correlation Coefficient</p>
+                        <div class="stat-value small"><span class="counter" id="m-mcc">0</span></div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card small-card alert-card">
+                        <h3>Log Loss</h3>
+                        <p class="tool-tip">Cross-entropy (Lower is better)</p>
+                        <div class="stat-value small"><span class="counter" id="m-loss">0</span></div>
+                    </div>
+                    <div class="stat-card glass-panel interactive-card small-card alert-card">
+                        <h3>Error Rate</h3>
+                        <p class="tool-tip">Misclassification %</p>
+                        <div class="stat-value small"><span class="counter" id="m-err">0</span>%</div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Visual Reports</h3>
+                <div class="charts-grid">
+                    <div class="chart-card glass-panel interactive-card">
+                        <div class="chart-overlay">Class Metrics</div>
+                        <img src="/static_src/test_class_metrics_chart.png" alt="Class Metrics" class="zoomable">
+                    </div>
+                    <div class="chart-card glass-panel interactive-card">
+                        <div class="chart-overlay">Confusion Matrix</div>
+                        <img src="/static_src/test_confusion_matrix.png" alt="Confusion Matrix" class="zoomable">
+                    </div>
+                    <div class="chart-card full-width glass-panel interactive-card">
+                        <div class="chart-overlay">Multi-Class ROC Curve</div>
+                        <img src="/static_src/test_roc_curve.png" alt="ROC Curve" class="zoomable">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Predict Section -->
+            <section id="predict" class="view-section">
+                <div class="hero glow-effect">
+                    <h1>Live <span class="gradient-text">Car Model Analysis</span></h1>
+                    <p>Upload a vehicle image to instantly visualize what the PyTorch model sees using GradCAM.</p>
+                </div>
+
+                <div class="predictor-layout">
+                    
+                    <div class="upload-zone glass-panel interactive-card" id="upload-zone">
+                        <input type="file" id="file-input" accept="image/*" hidden>
+                        <div class="upload-content">
+                            <div class="pulse-ring"></div>
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <h2>Initialize Scan</h2>
+                            <p>Drag & Drop an image here or browse</p>
+                        </div>
+                    </div>
+
+                    <div class="result-zone hidden" id="result-zone">
+                        <div class="loader-container glass-panel hidden" id="loader">
+                            <div class="neural-spinner"></div>
+                            <h3 class="gradient-text running-text">Executing Tensor Operations...</h3>
+                            <p>Calculating activations across 5.3M parameters.</p>
+                        </div>
+
+                        <div class="result-content glass-panel hidden interactive-card" id="result-content">
+                            <div class="image-preview relative">
+                                <img id="gradcam-preview" src="" alt="GradCAM Overlay" class="zoomable">
+                                <div class="scan-line"></div>
+                            </div>
+                            
+                            <div class="prediction-info">
+                                <h3 class="label">NEURAL PREDICTION</h3>
+                                <h2 id="pred-name" class="gradient-text big-title">...</h2>
+                                
+                                <div class="conf-wrapper">
+                                    <div class="conf-header">
+                                        <span>Softmax Confidence</span>
+                                        <span id="pred-conf-txt" class="glow">0%</span>
+                                    </div>
+                                    <div class="confidence-track">
+                                        <div class="confidence-fill glow-bar" id="conf-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="reasons-box">
+                                    <h3 class="box-title">GradCAM Peak Activations</h3>
+                                    <ul id="reasons-list"></ul>
+                                </div>
+                                
+                                <button class="btn primary-glow" id="reset-btn">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                                    Reset Scanner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox hidden">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

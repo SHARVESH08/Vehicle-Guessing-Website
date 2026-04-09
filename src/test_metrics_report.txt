@@ -1,0 +1,27 @@
+TEST SET AGGREGATE PERFORMANCE
+==================================================
+Accuracy:    0.8361 (83.61%)
+Precision:   0.8548
+Recall:      0.8361
+F1 Score:    0.8382
+ROC AUC:     0.9797
+==================================================
+
+Detailed Classification Report:
+
+                                   precision    recall  f1-score   support
+
+               1966_Dodge_Charger       0.67      0.80      0.73         5
+                 1969_Dino_246_GT       0.86      0.92      0.89        13
+1970_Lincoln_Continental_fourdoor       1.00      0.86      0.92         7
+               1971_Maserati_Bora       0.67      0.80      0.73         5
+           1980_Ferrari_Mondial_8       0.60      0.60      0.60         5
+           1988_Volkswagen_Passat       1.00      0.60      0.75         5
+      1993_Jeep_Grand_Cherokee_ZJ       1.00      1.00      1.00         5
+        2000_Toyota_Corolla_Sedan       0.67      0.80      0.73         5
+               2001_Nissan_XTrail       1.00      0.83      0.91         6
+   2002_Chevrolet_Corvette_C5_Z06       1.00      1.00      1.00         5
+
+                         accuracy                           0.84        61
+                        macro avg       0.85      0.82      0.83        61
+                     weighted avg       0.85      0.84      0.84        61
