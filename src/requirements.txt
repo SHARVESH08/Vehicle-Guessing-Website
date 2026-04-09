@@ -9,3 +9,4 @@ scikit-learn
 matplotlib
 seaborn
 gunicorn
+# Encoding perfectly fixed to UTF-8
