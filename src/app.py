@@ -89,60 +89,70 @@ def api_metrics():
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    if 'image' not in request.files:
-        return jsonify({"error": "No image uploaded"}), 400
+    try:
+        if 'image' not in request.files:
+            return jsonify({"error": "No image uploaded"}), 400
+            
+        file = request.files['image']
+        img_bytes = file.read()
         
-    file = request.files['image']
-    img_bytes = file.read()
-    
-    # Process original image for display/cv2
-    nparr = np.frombuffer(img_bytes, np.uint8)
-    orig_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    orig_h, orig_w = orig_img.shape[:2]
-    
-    # Process for PyTorch
-    pil_image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-    input_tensor = transform(pil_image).unsqueeze(0).to(device)
+        # Process original image for display/cv2
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        orig_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if orig_img is None:
+            return jsonify({"error": "Failed to decode image"}), 400
+        orig_h, orig_w = orig_img.shape[:2]
+        
+        # Process for PyTorch
+        pil_image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+        input_tensor = transform(pil_image).unsqueeze(0).to(device)
+        input_tensor.requires_grad_(True) # Force require grad to strictly ensure GradCAM hook activation
 
-    # Inference
-    with torch.no_grad():
-        output = model(input_tensor)
-        probs = torch.softmax(output, dim=1)
-        confidence, pred_class = torch.max(probs, dim=1)
+        # Inference
+        with torch.no_grad():
+            output = model(input_tensor)
+            probs = torch.softmax(output, dim=1)
+            confidence, pred_class = torch.max(probs, dim=1)
 
-    cam = gradcam.generate(input_tensor, pred_class.item())
-    cam_resized = cv2.resize(cam, (orig_w, orig_h))
-    explanations = explain(cam, orig_w, orig_h)
-    
-    heatmap = cv2.applyColorMap(np.uint8(255 * cam_resized), cv2.COLORMAP_JET)
-    overlay = cv2.addWeighted(orig_img, 0.6, heatmap, 0.4, 0)
+        cam = gradcam.generate(input_tensor, pred_class.item())
+        if cam is None:
+            return jsonify({"error": "GradCAM generated a None heatmap."}), 500
 
-    reasons = []
-    for rank, (name, (x1, y1, x2, y2)) in enumerate(explanations):
-        reasons.append(name)
-        thickness = max(2, orig_w // 150)
-        cv2.rectangle(overlay, (x1, y1), (x2, y2), (0, 255, 0), thickness)
-        text = f"#{rank+1} Region"
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = max(0.5, orig_w / 800)
-        font_thickness = max(1, orig_w // 400)
-        (text_w, text_h), _ = cv2.getTextSize(text, font, font_scale, font_thickness)
-        cv2.rectangle(overlay, (x1, y1), (x1 + text_w + 10, y1 + text_h + 10), (0, 255, 0), -1)
-        cv2.putText(overlay, text, (x1 + 5, y1 + text_h + 5), font, font_scale, (0, 0, 0), font_thickness, cv2.LINE_AA)
+        cam_resized = cv2.resize(cam, (orig_w, orig_h))
+        explanations = explain(cam, orig_w, orig_h)
+        
+        heatmap = cv2.applyColorMap(np.uint8(255 * cam_resized), cv2.COLORMAP_JET)
+        overlay = cv2.addWeighted(orig_img, 0.6, heatmap, 0.4, 0)
 
-    # Encode to Base64
-    _, buffer = cv2.imencode('.jpg', overlay)
-    base64_img = base64.b64encode(buffer).decode('utf-8')
+        reasons = []
+        for rank, (name, (x1, y1, x2, y2)) in enumerate(explanations):
+            reasons.append(name)
+            thickness = max(2, orig_w // 150)
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), (0, 255, 0), thickness)
+            text = f"#{rank+1} Region"
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = max(0.5, orig_w / 800)
+            font_thickness = max(1, orig_w // 400)
+            (text_w, text_h), _ = cv2.getTextSize(text, font, font_scale, font_thickness)
+            cv2.rectangle(overlay, (x1, y1), (x1 + text_w + 10, y1 + text_h + 10), (0, 255, 0), -1)
+            cv2.putText(overlay, text, (x1 + 5, y1 + text_h + 5), font, font_scale, (0, 0, 0), font_thickness, cv2.LINE_AA)
 
-    # Convert the prediction class into a readable string
-    car_model_name = class_names[pred_class.item()].replace('_', ' ')
+        # Encode to Base64
+        _, buffer = cv2.imencode('.jpg', overlay)
+        base64_img = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify({
-        "prediction": car_model_name,
-        "confidence": round(confidence.item() * 100, 2),
-        "reasons": reasons,
-        "image_data": f"data:image/jpeg;base64,{base64_img}"
-    })
+        car_model_name = class_names[pred_class.item()].replace('_', ' ')
+
+        return jsonify({
+            "prediction": car_model_name,
+            "confidence": round(confidence.item() * 100, 2),
+            "reasons": reasons,
+            "image_data": f"data:image/jpeg;base64,{base64_img}"
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc() # Log to server terminal
+        return jsonify({"error": f"Server Prediction Error: {str(e)}\n\n{traceback.format_exc()}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
