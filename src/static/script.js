@@ -148,9 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             body: formData
         })
-        .then(response => {
-            if(!response.ok) throw new Error("Server error");
-            return response.json();
+        .then(async response => {
+            const data = await response.json();
+            if(!response.ok) throw new Error(data.error || "Server error");
+            return data;
         })
         .then(data => {
             document.getElementById('gradcam-preview').src = data.image_data;
@@ -177,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resultContent.classList.remove('hidden');
         })
         .catch(err => {
-            alert('Error analyzing image. Please verify Flask server is running.');
+            alert(err.message);
             console.error(err);
             resetBtn.click();
         });
