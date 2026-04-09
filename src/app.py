@@ -20,8 +20,13 @@ CORS(app)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Loading model for Web API on:", device)
 
-dataset = datasets.ImageFolder(root="../Dataset/train")
-class_names = dataset.classes
+# Hardcoded to bypass the need for massive Dataset folders on cloud servers
+class_names = [
+    '1966_Dodge_Charger', '1969_Dino_246_GT', '1970_Lincoln_Continental_fourdoor', 
+    '1971_Maserati_Bora', '1980_Ferrari_Mondial_8', '1988_Volkswagen_Passat', 
+    '1993_Jeep_Grand_Cherokee_ZJ', '2000_Toyota_Corolla_Sedan', '2001_Nissan_XTrail', 
+    '2002_Chevrolet_Corvette_C5_Z06'
+]
 num_classes = len(class_names)
 
 model = get_model(num_classes)
